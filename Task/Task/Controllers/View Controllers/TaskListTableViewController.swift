@@ -6,13 +6,8 @@
 //
 
 import UIKit
-protocol TaskTableViewCellDelegate: AnyObject {
-    func taskCellButtonTapped(_ sender: TaskTableViewCell)
-}
-
 class TaskListTableViewController: UITableViewController {
     // MARK: - Properties
-    weak var delegate: TaskTableViewCellDelegate?
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -33,7 +28,8 @@ class TaskListTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "taskCell", for: indexPath) as? TaskTableViewCell else {return UITableViewCell()}
         
-        cell.textLabel?.text = TaskController.shared.tasks[indexPath.row].name
+        cell.delegate = self
+        cell.task = TaskController.shared.tasks[indexPath.row]
 
         return cell
     }
@@ -46,8 +42,6 @@ class TaskListTableViewController: UITableViewController {
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }
-
-
     
     // MARK: - Navigation
 
@@ -60,5 +54,14 @@ class TaskListTableViewController: UITableViewController {
             let taskToSend = TaskController.shared.tasks[index.row]
             destination.task = taskToSend
         }
+    }
+}
+
+// MARK: - Extensions
+extension TaskListTableViewController: TaskTableViewCellDelegate {
+    func taskCellButtonTapped(_ sender: TaskTableViewCell) {
+        guard let task = sender.task else {return}
+        TaskController.shared.toggleIsComplete(task: task)
+        sender.updateViews()
     }
 }

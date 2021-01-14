@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol TaskTableViewCellDelegate: AnyObject {
+    func taskCellButtonTapped(_ sender: TaskTableViewCell)
+}
+
 class TaskTableViewCell: UITableViewCell {
 
     // MARK: - Outlets
@@ -16,24 +20,27 @@ class TaskTableViewCell: UITableViewCell {
     // MARK: - Properties
     var task: Task? {
         didSet {
-            
+            updateViews()
         }
     }
+    
+    weak var delegate: TaskTableViewCellDelegate?
 
     // MARK: - Lifecycle
     
     
     // MARK: - Actions
     @IBAction func completionButtonTapped(_ sender: Any) {
-        delegate?
+        if let delegate = delegate {
+            delegate.taskCellButtonTapped(self)
+        }
     }
     
     // MARK: - Functions
     func updateViews() {
+        //update the button image
         guard let taskDetails = task else {return}
-        
         taskNameLabel.text = taskDetails.name
-         
         if taskDetails.isComplete {
             completionButton.setBackgroundImage(UIImage(named: "complete") , for: .normal)
         } else {
